@@ -6,3 +6,4 @@ PyJWT
 streamlit
 pandas
 requests
+supabase

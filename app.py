@@ -1,6 +1,6 @@
 import pandas as pd
 import streamlit as st
-from supabase import create_client, Client
+from supabase import create_client, Clien
 from datetime import date
 
 st.set_page_config(
@@ -57,34 +57,28 @@ def show_auth_page(client: Client):
                 "Create Account", use_container_width=True
             )
 
-        if submitted:
-            email = email.strip().lower()
-            if not email or "@" not in email:
-                st.error("Please enter a valid email address.")
-            elif len(password) < 8:
-                st.error("Password must have at least 8 characters.")
-            elif password != confirm_password:
-                st.error("Passwords do not match.")
+                if submitted:
+            if not email.strip() or not password:
+                st.error("Please enter your email and password.")
             else:
                 try:
-                    result = client.auth.sign_up(
-                        {"email": email, "password": password}
-                    )
-                    if result.session:
-                        st.session_state.user = {
-                            "id": result.user.id,
-                            "email": result.user.email,
+                    result = client.auth.sign_in_with_password(
+                        {
+                            "email": email.strip().lower(),
+                            "password": password,
                         }
-                        st.session_state.supabase_session = result.session
-                        st.rerun()
-                    else:
-                        st.success(
-                            "Account created. Check your email to confirm your "
-                            "account, then choose Login."
-                        )
-                except Exception as exc:
-                    st.error(f"Could not create account: {exc}")
-
+                    )
+                    st.session_state.user = {
+                        "id": result.user.id,
+                        "email": result.user.email,
+                    }
+                    st.session_state.supabase_session = result.session
+                    st.rerun()
+                except Exception:
+                    st.error(
+                        "Login failed. Check your email and password. "
+                        "Confirm your email first if required."
+                    )
     else:
         st.subheader("Welcome back")
         with st.form("login_form"):
